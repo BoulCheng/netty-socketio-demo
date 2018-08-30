@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Socketio测试页面</title>
+  </head>
+  <body>
+  
+  <!-- 引入官方的socket.io.js文件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<!-- 引入第三步创建的socketio_client.js文件 -->
+<script>
+var SocketioClient = {
+        createNew:function(host,port){
+            var client = {};
+            //服务器域名/IP
+            client.host = host;
+            //socketio服务端口号
+            client.port = port;
+            client.socket = io('http://'+host+':'+port);
+            client.socket.on('connect', () => {
+              console.log(client.socket.id); // 'G5p5...'
+            });
+            client.socket.on('connect', () => {
+                console.log("连接成功");
+            });
+            client.socket.on('connect_error', (error) => {
+                console.error("连接错误");
+            });
+            client.socket.on('connect_timeout', (timeout) => {
+                console.log("连接超时");
+            });
+            client.socket.on('error', (error) => {
+              // ...
+            });
+            client.socket.on('disconnect', (reason) => {
+                console.log("关闭连接");
+            });
+            client.socket.on('reconnect', (attemptNumber) => {
+                console.log("重新连接");
+            });
+            client.socket.on('reconnect_error', (error) => {
+              // ...
+            });
+            client.socket.on('reconnect_failed', () => {
+              // ...
+            });
+            client.socket.on('ping', () => {
+                //console.log("向服务器端发送数据包");
+            });
+            client.socket.on('pong', (latency) => {
+                //console.log("接收服务器数据包");
+            });
+            // 向服务端发送消息
+            client.send = function(event,msg,callback){
+                if(callback){
+                    client.socket.emit(event, msg,(data) =>callback);
+                }else{
+                    client.socket.emit(event, msg);
+                }
+            }
+            // 接收服务端消息
+            client.receive = function(event,callback){
+                client.socket.on(event,callback);
+            }
+            return client;
+        }
+}
+
+</script>
+
+<script type="text/javascript">
+//构建客户端实例
+var client = SocketioClient.createNew('localhost',9092);
+//接收消息处理
+client.receive('advert_info',function(data){
+    console.info(data);
+        // 在此处更新页面显示（提示效果）
+});
+//向服务端发送消息
+function sendMsg(){
+    client.send('advert_info', 'jiaqianli.cn@gmail.com');
+}
+</script>
+
+    
+  <form >
+    <input type="text" name="message" value="Netty最佳实践"/>
+    <br><br>
+<!-- 
+    <input type="button" value="连接服务器" onclick="socket_connect()">
+ -->
+    <input type="button" value="发送WebSocket请求消息" onclick="sendMsg()">
+ 
+    <hr color="blue"/>
+    <h3>服务器返回的应答消息</h3>
+    <textarea id="responseText" style="width:500px;height:300px;"></textarea>
+  </form>
+    
+  </body>
+</html>
